@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useAuth } from "@/app/firebase/auth-context";
 import { Button } from "@/components/ui/button";
@@ -10,7 +10,8 @@ import { generateUserMonthlyRecap } from "@/app/firebase/recap";
 import { toast } from "sonner";
 import Link from "next/link";
 
-export default function CreateRecapPage() {
+// Content component that uses searchParams
+function CreateRecapContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { currentUser } = useAuth();
@@ -193,5 +194,35 @@ export default function CreateRecapPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+// Loading component
+function CreateRecapLoading() {
+  return (
+    <div className="container mx-auto py-8">
+      <div className="max-w-2xl mx-auto">
+        <div className="mb-6">
+          <h1 className="text-2xl font-bold text-gray-900">Loading...</h1>
+        </div>
+        <Card className="mb-6 animate-pulse">
+          <CardHeader>
+            <CardTitle>Select Month</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="h-40 bg-gray-200 rounded"></div>
+          </CardContent>
+        </Card>
+      </div>
+    </div>
+  );
+}
+
+// Main component with suspense
+export default function CreateRecapPage() {
+  return (
+    <Suspense fallback={<CreateRecapLoading />}>
+      <CreateRecapContent />
+    </Suspense>
   );
 } 

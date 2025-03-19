@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/app/firebase/auth-context";
 import { getUserPracticePlans, getUserPracticeLogs } from "@/app/firebase/db";
@@ -24,7 +24,8 @@ const focusAreas = [
   { value: "mixed", label: "Mixed", badgeClass: "bg-gray-100 text-gray-700" }
 ];
 
-export default function Practice() {
+// Component that uses searchParams
+function PracticeContent() {
   const { currentUser } = useAuth();
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -283,5 +284,32 @@ function PracticePlanCard({ plan }: { plan: any }) {
         </Button>
       </CardFooter>
     </Card>
+  );
+}
+
+// Loading component
+function PracticeLoading() {
+  return (
+    <div className="container mx-auto py-8">
+      <div className="flex flex-col md:flex-row justify-between items-start mb-6">
+        <h1 className="text-3xl font-bold text-gray-900">Practice Center</h1>
+      </div>
+      <div className="animate-pulse">
+        <div className="h-10 bg-gray-200 rounded-md w-80 mb-6"></div>
+        <div className="space-y-4">
+          <div className="h-40 bg-gray-200 rounded-md"></div>
+          <div className="h-40 bg-gray-200 rounded-md"></div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// Main component with suspense
+export default function Practice() {
+  return (
+    <Suspense fallback={<PracticeLoading />}>
+      <PracticeContent />
+    </Suspense>
   );
 } 

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useAuth } from "@/app/firebase/auth-context";
 import { getUserProfile, saveMonthlyRecap, generateAutoSuggestedScores } from "@/app/firebase/db";
@@ -19,7 +19,8 @@ interface UserProfile {
   [key: string]: any;
 }
 
-export default function ManualCreateRecap() {
+// Wrapper component that uses searchParams
+function ManualRecapContent() {
   const { currentUser } = useAuth();
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -318,5 +319,37 @@ export default function ManualCreateRecap() {
         </Card>
       </div>
     </div>
+  );
+}
+
+// Loading fallback component
+function RecapFormLoading() {
+  return (
+    <div className="container mx-auto py-8">
+      <div className="max-w-3xl mx-auto">
+        <div className="flex items-center justify-between mb-6">
+          <h1 className="text-2xl font-bold text-gray-900">Loading Monthly Recap...</h1>
+        </div>
+        <Card className="animate-pulse">
+          <CardHeader>
+            <CardTitle>Loading...</CardTitle>
+            <CardDescription>Please wait</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-6">
+            <div className="h-40 bg-gray-200 rounded"></div>
+            <div className="h-40 bg-gray-200 rounded"></div>
+          </CardContent>
+        </Card>
+      </div>
+    </div>
+  );
+}
+
+// Main page component with suspense boundary
+export default function ManualCreateRecap() {
+  return (
+    <Suspense fallback={<RecapFormLoading />}>
+      <ManualRecapContent />
+    </Suspense>
   );
 } 

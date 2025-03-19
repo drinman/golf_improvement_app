@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useAuth } from "@/app/firebase/auth-context";
 import { getUserProfile } from "@/app/firebase/db";
@@ -130,7 +130,8 @@ const focusAreas = [
   { value: "mixed", label: "Mixed", badgeClass: "bg-gray-100 text-gray-700" }
 ];
 
-export default function PracticePlanner() {
+// Component that uses searchParams
+function PracticePlannerContent() {
   const { currentUser } = useAuth();
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -1619,4 +1620,34 @@ export default function PracticePlanner() {
       {linkDialogOpen && renderLinkLogDialog()}
     </div>
   );
-} 
+}
+
+// Loading component
+function PracticePlanLoading() {
+  return (
+    <div className="container mx-auto py-8">
+      <div className="max-w-4xl mx-auto">
+        <div className="flex justify-between items-center mb-6">
+          <h1 className="text-2xl font-bold text-gray-900">Practice Plan</h1>
+        </div>
+        <div className="animate-pulse">
+          <div className="h-40 bg-gray-200 rounded-md mb-6"></div>
+          <div className="space-y-4">
+            <div className="h-20 bg-gray-200 rounded-md"></div>
+            <div className="h-20 bg-gray-200 rounded-md"></div>
+            <div className="h-20 bg-gray-200 rounded-md"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// Main component with suspense boundary
+export default function PracticePlanner() {
+  return (
+    <Suspense fallback={<PracticePlanLoading />}>
+      <PracticePlannerContent />
+    </Suspense>
+  );
+}

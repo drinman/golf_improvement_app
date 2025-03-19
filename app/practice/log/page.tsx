@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useAuth } from "@/app/firebase/auth-context";
 import { logPracticeSession, getUserPracticePlans } from "@/app/firebase/db";
@@ -31,7 +31,8 @@ const activityCategories = [
 // Duration options in minutes
 const durationOptions = [10, 15, 20, 30, 45, 60, 90, 120];
 
-export default function LogPractice() {
+// Component that uses searchParams
+function LogPracticeContent() {
   const { currentUser } = useAuth();
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -538,5 +539,35 @@ export default function LogPractice() {
         </Card>
       </div>
     </div>
+  );
+}
+
+// Loading component
+function LogPracticeLoading() {
+  return (
+    <div className="container mx-auto py-8">
+      <div className="max-w-2xl mx-auto">
+        <div className="flex items-center justify-between mb-6">
+          <h1 className="text-2xl font-bold text-gray-800">Log Session</h1>
+        </div>
+        <div className="animate-pulse">
+          <div className="h-10 bg-gray-200 rounded-md mb-6"></div>
+          <div className="space-y-4">
+            <div className="h-20 bg-gray-200 rounded-md"></div>
+            <div className="h-20 bg-gray-200 rounded-md"></div>
+            <div className="h-40 bg-gray-200 rounded-md"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// Main component with suspense
+export default function LogPractice() {
+  return (
+    <Suspense fallback={<LogPracticeLoading />}>
+      <LogPracticeContent />
+    </Suspense>
   );
 } 

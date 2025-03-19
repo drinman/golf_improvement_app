@@ -4,7 +4,6 @@ import "./globals.css";
 import { AuthProvider } from "./firebase/auth-context";
 import Navigation from "./components/navigation";
 import { Toaster } from "@/components/ui/sonner";
-import { AuthRouteGuard } from "./_components/route-guard";
 import TutorialController from "./components/tutorial/tutorial-controller";
 import FeedbackButton from "./components/feedback-button";
 
@@ -24,19 +23,17 @@ export default function RootLayout({
     <html lang="en">
       <body className={inter.className}>
         <AuthProvider>
-          <AuthRouteGuard>
-            <div className="min-h-screen flex flex-col bg-gray-50">
-              <Navigation />
-              <main className="flex-grow pt-16 px-4 md:px-6">
-                {children}
-              </main>
-              <footer className="py-4 text-center text-sm text-gray-500 border-t">
-                &copy; {new Date().getFullYear()} UpSwing. All rights reserved.
-              </footer>
-              <FeedbackButton />
-            </div>
-            <TutorialController />
-          </AuthRouteGuard>
+          <div className="min-h-screen flex flex-col bg-gray-50">
+            <Navigation />
+            <main className="flex-grow pt-16 px-4 md:px-6">
+              {children}
+            </main>
+            <footer className="py-4 text-center text-sm text-gray-500 border-t">
+              &copy; {new Date().getFullYear()} UpSwing. All rights reserved.
+            </footer>
+            <FeedbackButton />
+          </div>
+          <TutorialController />
           <Toaster />
         </AuthProvider>
       </body>

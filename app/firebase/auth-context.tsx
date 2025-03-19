@@ -13,7 +13,6 @@ import {
   UserCredential
 } from "firebase/auth";
 import { auth } from "./config";
-import { getAnalytics } from "firebase/analytics";
 
 // Define the shape of our auth context
 type AuthContextType = {
@@ -72,12 +71,21 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   // Subscribe to auth state changes
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
-      setCurrentUser(user);
-      setLoading(false);
-    });
+    try {
+      const unsubscribe = onAuthStateChanged(auth, (user) => {
+        setCurrentUser(user);
+        setLoading(false);
+      }, (error) => {
+        console.error("Auth state change error:", error);
+        setLoading(false);
+      });
 
-    return unsubscribe;
+      return unsubscribe;
+    } catch (error) {
+      console.error("Error setting up auth listener:", error);
+      setLoading(false);
+      return () => {};
+    }
   }, []);
 
   const value = {
@@ -92,7 +100,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   return (
     <AuthContext.Provider value={value}>
-      {!loading && children}
+      {children}
     </AuthContext.Provider>
   );
 }; 
