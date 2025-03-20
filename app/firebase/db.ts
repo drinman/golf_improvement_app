@@ -50,14 +50,22 @@ export const createUserProfile = async (
       hasCompletedTutorial: data.hasCompletedTutorial !== undefined ? data.hasCompletedTutorial : false
     };
     
+    // Clean userData to remove undefined values, as Firestore doesn't support 'undefined'
+    const cleanedUserData: Record<string, any> = {};
+    Object.entries(userData).forEach(([key, value]) => {
+      if (value !== undefined) {
+        cleanedUserData[key] = value;
+      }
+    });
+    
     if (docSnap.exists()) {
       // Update only the fields that are provided
-      console.log("Profile exists, updating:", userData);
-      return await updateDoc(docRef, userData);
+      console.log("Profile exists, updating:", cleanedUserData);
+      return await updateDoc(docRef, cleanedUserData);
     } else {
       // Create new profile
-      console.log("Creating new profile:", userData);
-      return await setDoc(docRef, userData);
+      console.log("Creating new profile:", cleanedUserData);
+      return await setDoc(docRef, cleanedUserData);
     }
   } catch (error) {
     console.error("Error creating/updating user profile:", error);
