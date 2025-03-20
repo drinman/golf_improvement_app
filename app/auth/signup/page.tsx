@@ -25,7 +25,9 @@ export default function SignUp() {
     setIsLoading(true);
     
     try {
-      const userCredential = await signUp(email, password);
+      console.log("Signing up with email:", email);
+      // Trim inputs to remove accidental whitespace
+      const userCredential = await signUp(email.trim(), password);
       const user = userCredential.user;
       
       // Prepare profile data with proper validation
@@ -44,8 +46,21 @@ export default function SignUp() {
       toast.success("Account created successfully!");
       router.push("/dashboard");
     } catch (error: any) {
+      console.error("Signup error details:", error.code, error.message);
+      
+      // More user-friendly error messages
+      if (error.code === 'auth/email-already-in-use') {
+        toast.error("This email is already in use. Please try signing in instead.");
+      } else if (error.code === 'auth/invalid-email') {
+        toast.error("Invalid email format. Please check your email.");
+      } else if (error.code === 'auth/weak-password') {
+        toast.error("Password is too weak. Please use a stronger password.");
+      } else if (error.code === 'auth/operation-not-allowed') {
+        toast.error("Sign up is currently disabled. Please try again later.");
+      } else {
+        toast.error(error.message || "Failed to create account");
+      }
       console.error("Signup error:", error);
-      toast.error(error.message || "Failed to create account");
     } finally {
       setIsLoading(false);
     }

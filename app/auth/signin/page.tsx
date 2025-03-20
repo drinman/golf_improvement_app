@@ -21,11 +21,27 @@ export default function SignIn() {
     setIsLoading(true);
     
     try {
-      await signIn(email, password);
+      console.log("Signing in with email:", email);
+      // Trim email and password to remove any accidental whitespace
+      const result = await signIn(email.trim(), password);
+      console.log("Sign in successful");
       toast.success("Signed in successfully!");
       router.push("/dashboard");
     } catch (error: any) {
-      toast.error(error.message || "Failed to sign in");
+      console.error("Sign in error details:", error.code, error.message);
+      
+      // More user-friendly error messages
+      if (error.code === 'auth/invalid-credential') {
+        toast.error("Invalid email or password. Please try again.");
+      } else if (error.code === 'auth/invalid-email') {
+        toast.error("Invalid email format. Please check your email.");
+      } else if (error.code === 'auth/user-disabled') {
+        toast.error("This account has been disabled. Please contact support.");
+      } else if (error.code === 'auth/user-not-found' || error.code === 'auth/wrong-password') {
+        toast.error("Invalid credentials. Please check your email and password.");
+      } else {
+        toast.error(error.message || "Failed to sign in");
+      }
       console.error(error);
     } finally {
       setIsLoading(false);

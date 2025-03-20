@@ -19,7 +19,7 @@ type AuthContextType = {
   currentUser: User | null;
   loading: boolean;
   signUp: (email: string, password: string) => Promise<UserCredential>;
-  signIn: (email: string, password: string) => Promise<void>;
+  signIn: (email: string, password: string) => Promise<UserCredential>;
   signInWithGoogle: () => Promise<UserCredential>;
   signInWithApple: () => Promise<UserCredential>;
   logout: () => Promise<void>;
@@ -49,7 +49,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   // Sign in with email/password
   const signIn = async (email: string, password: string) => {
-    await signInWithEmailAndPassword(auth, email, password);
+    try {
+      console.log("Attempting to sign in with:", { email }); // Don't log password
+      return await signInWithEmailAndPassword(auth, email, password);
+    } catch (error: any) {
+      console.error("Firebase signIn error:", error.code, error.message);
+      throw error;
+    }
   };
 
   // Sign in with Google
