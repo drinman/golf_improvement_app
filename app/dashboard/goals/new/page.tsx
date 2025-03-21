@@ -144,7 +144,7 @@ export default function NewGoal() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <label htmlFor="currentValue" className="text-sm font-medium">
-                    Current Value
+                    {category === "handicap" ? "Current Handicap" : "Current Value"}
                   </label>
                   <Input
                     id="currentValue"
@@ -152,13 +152,22 @@ export default function NewGoal() {
                     step="0.1"
                     value={currentValue}
                     onChange={(e) => setCurrentValue(e.target.value)}
-                    placeholder="e.g., 15.2"
+                    placeholder={
+                      category === "handicap" ? "e.g., 15.2" :
+                      category === "scoring" ? "e.g., 85" :
+                      category === "putting" ? "e.g., 33" :
+                      category === "driving" ? "e.g., 240" :
+                      category === "fairways" ? "e.g., 50" :
+                      category === "greens" ? "e.g., 40" :
+                      category === "practice" ? "e.g., 5" :
+                      "Current value"
+                    }
                   />
                 </div>
 
                 <div className="space-y-2">
                   <label htmlFor="targetValue" className="text-sm font-medium">
-                    Target Value <span className="text-red-500">*</span>
+                    {category === "handicap" ? "Target Handicap" : "Target Value"} <span className="text-red-500">*</span>
                   </label>
                   <Input
                     id="targetValue"
@@ -166,7 +175,16 @@ export default function NewGoal() {
                     step="0.1"
                     value={targetValue}
                     onChange={(e) => setTargetValue(e.target.value)}
-                    placeholder="e.g., 9.9"
+                    placeholder={
+                      category === "handicap" ? "e.g., 9.9" :
+                      category === "scoring" ? "e.g., 79" :
+                      category === "putting" ? "e.g., 28" :
+                      category === "driving" ? "e.g., 270" :
+                      category === "fairways" ? "e.g., 70" :
+                      category === "greens" ? "e.g., 60" :
+                      category === "practice" ? "e.g., 10" :
+                      "Target value"
+                    }
                     required
                   />
                 </div>
