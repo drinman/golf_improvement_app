@@ -136,8 +136,16 @@ export const addGoal = async (userId: string, goalData: {
   category: string;
   createdAt: Timestamp;
 }) => {
+  // Clean goalData to remove undefined values, as Firestore doesn't support 'undefined'
+  const cleanedGoalData: Record<string, any> = {};
+  Object.entries(goalData).forEach(([key, value]) => {
+    if (value !== undefined) {
+      cleanedGoalData[key] = value;
+    }
+  });
+  
   const goalsCollection = collection(db, "users", userId, "goals");
-  return await addDoc(goalsCollection, goalData);
+  return await addDoc(goalsCollection, cleanedGoalData);
 };
 
 export const getUserGoals = async (userId: string) => {
@@ -162,8 +170,16 @@ export const savePracticePlan = async (userId: string, planData: {
   aiGenerated: boolean;
   createdAt: Timestamp;
 }) => {
+  // Clean planData to remove undefined values
+  const cleanedPlanData: Record<string, any> = {};
+  Object.entries(planData).forEach(([key, value]) => {
+    if (value !== undefined) {
+      cleanedPlanData[key] = value;
+    }
+  });
+  
   const plansCollection = collection(db, "users", userId, "practicePlans");
-  return await addDoc(plansCollection, planData);
+  return await addDoc(plansCollection, cleanedPlanData);
 };
 
 export const getUserPracticePlans = async (userId: string) => {
@@ -191,8 +207,16 @@ export const logPracticeSession = async (userId: string, logData: {
   date: Timestamp;
   createdAt: Timestamp;
 }) => {
+  // Clean logData to remove undefined values
+  const cleanedLogData: Record<string, any> = {};
+  Object.entries(logData).forEach(([key, value]) => {
+    if (value !== undefined) {
+      cleanedLogData[key] = value;
+    }
+  });
+  
   const logsCollection = collection(db, "users", userId, "practiceLogs");
-  return await addDoc(logsCollection, logData);
+  return await addDoc(logsCollection, cleanedLogData);
 };
 
 export const getUserPracticeLogs = async (userId: string) => {
@@ -218,6 +242,14 @@ export const saveMonthlyRecap = async (userId: string, recapData: {
   userReviewed?: boolean;
   createdAt: Timestamp;
 }) => {
+  // Clean recapData to remove undefined values
+  const cleanedRecapData: Record<string, any> = {};
+  Object.entries(recapData).forEach(([key, value]) => {
+    if (value !== undefined) {
+      cleanedRecapData[key] = value;
+    }
+  });
+  
   const recapsCollection = collection(db, "users", userId, "monthlyRecaps");
   // Check if a recap for this month already exists
   const q = query(recapsCollection, where("month", "==", recapData.month));
@@ -226,10 +258,10 @@ export const saveMonthlyRecap = async (userId: string, recapData: {
   if (!querySnapshot.empty) {
     // Update existing recap
     const recapDoc = querySnapshot.docs[0];
-    return await updateDoc(doc(db, "users", userId, "monthlyRecaps", recapDoc.id), recapData);
+    return await updateDoc(doc(db, "users", userId, "monthlyRecaps", recapDoc.id), cleanedRecapData);
   } else {
     // Create new recap
-    return await addDoc(recapsCollection, recapData);
+    return await addDoc(recapsCollection, cleanedRecapData);
   }
 };
 
@@ -386,21 +418,28 @@ export const addFeedback = async (feedbackData: Feedback) => {
       feedbackData.deviceInfo = `${window.navigator.userAgent}, ${window.innerWidth}x${window.innerHeight}`;
     }
     
+    // Clean feedbackData to remove undefined values
+    const cleanedFeedbackData: Record<string, any> = {};
+    Object.entries(feedbackData).forEach(([key, value]) => {
+      if (value !== undefined) {
+        cleanedFeedbackData[key] = value;
+      }
+    });
+    
+    // Ensure createdAt is properly handled as a Timestamp
+    if (cleanedFeedbackData.createdAt && !(cleanedFeedbackData.createdAt instanceof Timestamp)) {
+      cleanedFeedbackData.createdAt = Timestamp.fromDate(cleanedFeedbackData.createdAt);
+    }
+    
     // Store in user's feedback collection if logged in
     if (feedbackData.userId) {
       const feedbackCollection = collection(db, "users", userId, "feedback");
-      await addDoc(feedbackCollection, {
-        ...feedbackData,
-        createdAt: Timestamp.fromDate(feedbackData.createdAt)
-      });
+      await addDoc(feedbackCollection, cleanedFeedbackData);
     }
     
     // Also store in global feedback collection for easy access
     const globalFeedbackCollection = collection(db, "feedback");
-    return await addDoc(globalFeedbackCollection, {
-      ...feedbackData,
-      createdAt: Timestamp.fromDate(feedbackData.createdAt)
-    });
+    return await addDoc(globalFeedbackCollection, cleanedFeedbackData);
   } catch (error) {
     console.error("Error adding feedback:", error);
     throw error;
