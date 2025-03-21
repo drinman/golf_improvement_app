@@ -1,9 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/app/firebase/auth-context";
-import { addGoal } from "@/app/firebase/db";
+import { addGoal, getUserProfile } from "@/app/firebase/db";
 import { Timestamp } from "firebase/firestore";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -21,6 +21,51 @@ export default function NewGoal() {
   const [targetValue, setTargetValue] = useState("");
   const [category, setCategory] = useState("handicap");
   const [isLoading, setIsLoading] = useState(false);
+  const [profileHandicap, setProfileHandicap] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchUserHandicap = async () => {
+      if (!currentUser) return;
+      
+      try {
+        const profile = await getUserProfile(currentUser.uid);
+        if (profile && 'handicap' in profile && 
+            profile.handicap !== undefined && 
+            profile.handicap !== null) {
+          setProfileHandicap(profile.handicap.toString());
+          if (category === "handicap") {
+            setCurrentValue(profile.handicap.toString());
+          }
+        }
+      } catch (error) {
+        console.error("Error fetching user handicap:", error);
+      }
+    };
+
+    fetchUserHandicap();
+  }, [currentUser, category]);
+
+  // Update current value when category changes to/from handicap
+  useEffect(() => {
+    if (category === "handicap" && profileHandicap) {
+      setCurrentValue(profileHandicap);
+    } else if (category !== "handicap") {
+      setCurrentValue("");
+    }
+  }, [category, profileHandicap]);
+
+  const handleCategoryChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const newCategory = e.target.value;
+    setCategory(newCategory);
+    
+    // If changing to handicap and profile handicap exists, use it
+    if (newCategory === "handicap" && profileHandicap) {
+      setCurrentValue(profileHandicap);
+    } else if (newCategory !== "handicap") {
+      // Clear the current value for non-handicap categories
+      setCurrentValue("");
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -112,7 +157,7 @@ export default function NewGoal() {
                   <select
                     id="category"
                     value={category}
-                    onChange={(e) => setCategory(e.target.value)}
+                    onChange={handleCategoryChange}
                     className="w-full rounded-md border border-gray-300 p-2"
                     required
                   >
@@ -162,7 +207,19 @@ export default function NewGoal() {
                       category === "practice" ? "e.g., 5" :
                       "Current value"
                     }
+                    readOnly={category === "handicap"}
+                    className={category === "handicap" ? "bg-gray-100" : ""}
                   />
+                  {category === "handicap" && !profileHandicap && (
+                    <p className="text-xs text-amber-600 mt-1">
+                      Set your handicap in your profile for it to appear here.
+                    </p>
+                  )}
+                  {category === "handicap" && profileHandicap && (
+                    <p className="text-xs text-gray-500 mt-1">
+                      This value is pulled from your profile. Update it there if needed.
+                    </p>
+                  )}
                 </div>
 
                 <div className="space-y-2">
